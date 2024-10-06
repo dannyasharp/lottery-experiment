@@ -9,9 +9,14 @@ const ulid = require("ulid");
 
 //this will write errors
 client.on("error", (error) => {
-	console.log(error);
+	console.log("Redis Client Error:", error);
 
 });
+
+// Connect to Redis on server start
+client.connect()
+  .then(() => console.log("Connected to Redis"))
+  .catch((err) => console.error("Failed to connect to Redis:", err));
 
 app.use(express.json({ limit: '10kb' }));
 
@@ -43,15 +48,20 @@ const { type, name, prize} = req.body;
  };
 
  try {
+
+	console.log("New Lottery Data:", newLottery);
+	console.log("Attempting Redis Multi command...");
+
 	await client
 		.multi()
 		.hSet(`lottery.${id}`, newLottery)
 		.lPush("lotteries", id)
 	.exec();
 
+	console.log("Redis command executed successfully");
 	res.json(newLottery);
 }	catch (error) {
-	console.error(error);
+	console.error("Error during lottery creation:", error);
 	res.status(500).json({ error: "failed to create lottery"});
 }
 });
