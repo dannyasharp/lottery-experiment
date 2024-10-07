@@ -71,6 +71,22 @@ app.get("/", (req, res) => {
 	res.json({});
 });
 
+app.get("/lottery/:id", async (req, res) => {
+	// get individual lottery
+	const id = req.params.id;
+
+	try {
+		console.log("getting an individual lottery");
+
+		await client
+		.hGet(id, "name")
+		.exec();
+	}	catch (error) {
+		console.error("Error during lottery fetch by id:", error);
+		res.status(500).json({ error: "failed to fetch lottery"});
+	}
+});
+
 app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 });
